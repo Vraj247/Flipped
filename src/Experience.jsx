@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Html, ContactShadows, PresentationControls, Float, Environment, useGLTF } from '@react-three/drei';
 
 export default function Experience() {
@@ -34,7 +34,8 @@ export default function Experience() {
                                 src="steve.mp4"
                                 autoPlay
                                 loop
-
+                                 // Ensure to mute the video to prevent audio conflicts
+                                controls // Temporarily add controls for testing
                                 style={{ width: '100%', height: '100%', borderRadius: '0px', opacity:'0.8' }}
                             ></video>
                         </Html>
