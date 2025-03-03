@@ -19,7 +19,7 @@ export default function Experience({ onHoverChange }) {
         });
         if (videoRef.current) {
             gsap.to(videoRef.current, {
-                volume: 1,
+                volume: 0.7,
                 duration: 0.5,
                 ease: "power2.out"
             });
@@ -52,13 +52,13 @@ export default function Experience({ onHoverChange }) {
                 rotation={[0, 0, 0]}
                 polar={[-0.0, 0.0]}
                 azimuth={[-1, 0.75]}
-                config={{ mass: 1, tension: 50 }}
-                snap={{ mass: 1, tension: 40 }}
+                config={{ mass: 1, tension: 1000 }}
+                snap={{ mass: 1, tension: 100 }}
             >
                 <Float rotationIntensity={0.4}>
                     <primitive
                         object={computer.scene}
-                        position-y={1.0}
+                        position-y ={3.0}
                     >
                         <Html
                             transform
@@ -78,6 +78,7 @@ export default function Experience({ onHoverChange }) {
                                     src="/steve.mp4"
                                     autoPlay
                                     loop
+                                    playsInline
                                     volume={0.1}
                                     style={{ width: '100%', height: '100%', borderRadius: '0px', opacity:'1' }}
                                 ></video>
