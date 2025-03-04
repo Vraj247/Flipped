@@ -52,7 +52,7 @@ function App() {
                     zIndex: 1000
                 }}
             >
-                hover on video
+                ↞ Pan around and hover ↠
             </div>
         </div>
     );
