@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Html, ContactShadows, PresentationControls, Float, Environment, useGLTF } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import gsap from 'gsap';
@@ -6,9 +6,58 @@ import gsap from 'gsap';
 export default function Experience({ onHoverChange }) {
     const computer = useGLTF('/scene.gltf');
     const videoRef = useRef(null);
+    const audioRef = useRef(null);
+    const filterRef = useRef(null);
     const { camera } = useThree();
     const [isHovered, setIsHovered] = useState(false);
   
+    useEffect(() => {
+        // Create audio context and filter
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const filter = audioContext.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 20000; // Normal frequency
+        filterRef.current = filter;
+
+        // Create audio element
+        const audio = new Audio('/Feel.mp3');
+        audio.loop = true;
+        audio.volume = 0.5;
+        audioRef.current = audio;
+
+        // Connect audio to filter
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(filter);
+        filter.connect(audioContext.destination);
+
+        // Start playing immediately
+        audio.play().catch(error => {
+            console.log("Autoplay prevented:", error);
+            // Fallback to user interaction
+            const handleInteraction = () => {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                if (audio.paused) {
+                    audio.play();
+                }
+            };
+
+            window.addEventListener('click', handleInteraction);
+            window.addEventListener('touchstart', handleInteraction);
+
+            return () => {
+                window.removeEventListener('click', handleInteraction);
+                window.removeEventListener('touchstart', handleInteraction);
+            };
+        });
+
+        return () => {
+            audio.pause();
+            audioContext.close();
+        };
+    }, []);
+
     const handleMouseEnter = () => {
         setIsHovered(true);
         onHoverChange(true);
@@ -19,6 +68,25 @@ export default function Experience({ onHoverChange }) {
         });
         if (videoRef.current) {
             gsap.to(videoRef.current, {
+                volume: 0.7,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        }
+        // Apply low-pass filter effect
+        if (filterRef.current) {
+            gsap.to(filterRef.current.frequency, {
+                value: 200,  // Much lower frequency for more muffled sound
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        }
+        // Start playing audio if not already playing
+        if (audioRef.current) {
+            if (audioRef.current.paused) {
+                audioRef.current.play();
+            }
+            gsap.to(audioRef.current, {
                 volume: 0.7,
                 duration: 0.5,
                 ease: "power2.out"
@@ -41,6 +109,22 @@ export default function Experience({ onHoverChange }) {
                 ease: "power2.out"
             });
         }
+        // Return to normal frequency
+        if (filterRef.current) {
+            gsap.to(filterRef.current.frequency, {
+                value: 20000,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        }
+        // Lower volume when not hovering
+        if (audioRef.current) {
+            gsap.to(audioRef.current, {
+                volume: 0.3,
+                duration: 0.5,
+                ease: "power2.out"
+            });
+        }
     };
   
     return (
@@ -49,13 +133,13 @@ export default function Experience({ onHoverChange }) {
             <color args={['#01010']} attach="background" />
             <PresentationControls
                 global
+                config={{ mass: 5, tension: 200 }}
+                snap={{ mass: 2, tension: 800 }}
                 rotation={[0, 0, 0]}
                 polar={[0.0, 1.0]}
                 azimuth={[-0.5, 0.5]}
-                config={{ mass: 3, tension: 200 }}
-                snap={{ mass: 4, tension: 1500 }}
             >
-                <Float rotationIntensity={isHovered ? 0 : 0.7}>
+                <Float rotationIntensity={isHovered ? 0 : 0.1}>
                     <primitive
                         object={computer.scene}
                         position-y ={0.0}
